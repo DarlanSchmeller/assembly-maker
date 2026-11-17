@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estação de Trabalho | Atuador</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Paho MQTT Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <nav class="bg-blue-900 text-white p-4 flex justify-between items-center shadow-md">
+        <div class="font-bold text-lg">Bancada 01 - Montagem</div>
+        <div id="mqtt-status" class="text-sm bg-red-500 px-3 py-1 rounded-full">Desconectado</div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto mt-8 p-4">
+        <div class="bg-white rounded-xl shadow p-6 mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Controle de Turno</h2>
+            <button id="btn-start" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg text-lg w-full transition">
+                INICIAR TURNO E CRONÔMETRO
+            </button>
+        </div>
+
+        <div class="bg-blue-50 border-l-4 border-blue-600 p-6 rounded shadow">
+            <h3 class="text-xl font-bold text-blue-800 mb-4">Instruções de Trabalho - Caixa Padrão</h3>
+            <ol class="list-decimal list-inside space-y-3 text-lg">
+                <li>Posicione a caixa com as <strong>3 peças</strong> na área de leitura do sensor ultrassônico.</li>
+                <li>Aguarde a luz verde de confirmação na bancada.</li>
+                <li>Monte a peça 1, seguida da 2 e da 3. A célula de carga atualizará o peso automaticamente.</li>
+                <li>Após retirar a 3ª peça, remova a caixa vazia da área.</li>
+            </ol>
+        </div>
+    </main>
+
+    <script src="js/mqtt-client.js"></script>
+    <script src="js/atuador.js"></script>
+</body>
+</html>

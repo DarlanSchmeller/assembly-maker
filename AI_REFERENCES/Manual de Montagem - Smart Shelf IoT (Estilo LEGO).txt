@@ -1,0 +1,161 @@
+﻿MANUAL DE MONTAGEM E GUIA DE CONSTRUÇÃO: SMART SHELF IoT
+Set nº 2026-IOOT | Nível: Engenharia de Software | Tempo Estimado: 45 min
+|---|Balança Digital e Computação em Nuvem*
+
+
+________________
+
+
+📦 INVENTÁRIO DE PEÇAS (BOM - BILL OF MATERIALS)
+Antes de começar a montagem do seu kit de IoT, verifique se todos os componentes listados abaixo estão presentes em sua bancada de trabalho:
+
+
+Item
+	Componente
+	Qtd.
+	Função / Descrição
+	01
+	ESP32 NodeMCU-32S
+	1x
+	Cérebro computacional com Wi-Fi/Bluetooth integrados
+	02
+	Célula de Carga em Barra (5-10 kg)
+	1x
+	Sensor mecânico/elétrico de deformação (strain gauge)
+	03
+	Módulo Amplificador ADC HX711
+	1x
+	Conversor analógico-digital de 24 bits de alta precisão
+	04
+	LED Indicador 5mm (Verde/Vermelho)
+	1x
+	Atuador luminoso para sinalização Pick-to-Light
+	05
+	Resistor 220 Ohms
+	1x
+	Limitador de corrente (Cores: Vermelho-Vermelho-Marrom)
+	06
+	Protoboard (400 ou 830 pontos)
+	1x
+	Base de prototipagem e fixação das conexões elétricas
+	07
+	Jumpers M-M e M-F
+	10x
+	Cabos de conexão rápida para interligação dos pinos
+	08
+	Cabo Micro-USB
+	1x
+	Interface para alimentação elétrica e gravação de firmware
+	09
+	Placas Rígidas (Acra/Madeira)
+	2x
+	Estrutura mecânica para base fixa e prato suspenso
+	
+
+________________
+
+
+🧩 PASSO 1: MONTAGEM ESTRUTURAL DA BALANÇA
+Objetivo: Fixar a célula de carga de modo a garantir a livre flexão do elemento sensor.
+
+
+1. Fixação Inferior: Parafuse uma das extremidades da célula de carga na placa rígida que servirá de base. Atenção: Utilize calços ou espaçadores entre a placa e a barra para garantir que o centro da célula não encoste na base durante a deflexão.
+2. Sentido de Carga: Localize a seta indicadora gravada no corpo metálico da célula de carga. A seta deve apontar para baixo (direção do vetor da força gravitacional).
+3. Fixação Superior (Prato): Parafuse a extremidade oposta da barra na placa superior (onde os produtos serão posicionados), mantendo a estrutura em balanço (cantilever).
+
+
+________________
+
+
+🔌 PASSO 2: FIAÇÃO DA CÉLULA DE CARGA AO MÓDULO HX711
+Objetivo: Conectar os condutores do sensor de ponte extensométrica às entradas do amplificador.
+
+
+Faça a conexão dos 4 fios coloridos oriundos da célula de carga diretamente nos terminais correspondentes da placa do HX711:
+
+
+* 🔴 Fio Vermelho ➔ Terminal E+ (Excitação Positiva)
+* ⚫ Fio Preto ➔ Terminal E- (Excitação Negativa / GND Analógico)
+* ⚪ Fio Branco ➔ Terminal A- (Sinal Analógico Negativo - Canal A)
+* 🟢 Fio Verde ➔ Terminal A+ (Sinal Analógico Positivo - Canal A)
+
+
+________________
+
+
+⚡ PASSO 3: CONEXÃO DO HX711 E ATUADOR AO ESP32
+Objetivo: Interligar o conversor de dados e a sinalização luminosa ao microcontrolador principal.
+3.1. Módulo Conversor HX711 ➔ ESP32
+Pino HX711
+	Pino ESP32
+	Função
+	VCC
+	VIN (5V) ou 3V3
+	Alimentação do Circuito
+	GND
+	GND
+	Terra Comum
+	DT
+	GPIO 21
+	Barramento de Dados (Data)
+	SCK
+	GPIO 22
+	Sinal de Relógio (Clock)
+	3.2. LED Indicador de Alerta (Pick-to-Light)
+* Anodo (Perna Longa / +): Conecte a um dos terminais do resistor de 220Ω. O outro terminal do resistor deve ser ligado diretamente ao pino GPIO 2 do ESP32.
+* Catodo (Perna Curta / -): Conecte diretamente ao barramento GND do ESP32.
+
+
+________________
+
+
+💻 PASSO 4: GRAVAÇÃO DO FIRMWARE (SOFTWARE DA BORDA)
+Objetivo: Carregar a lógica de processamento local (Edge Computing) e protocolo MQTT.
+
+
+1. Abra o seu ambiente de desenvolvimento (Arduino IDE ou VS Code com PlatformIO).
+2. No gerenciador de bibliotecas, localize e instale as dependências:
+   * HX711 (por Bogdan Necula)
+   * PubSubClient (por Nick O'Leary)
+   * ArduinoJson (por Benoît Blanchon)
+3. No código-fonte, configure as variáveis de rede:
+   * Redes sem fio: Defina o SSID e a SENHA da sua rede local.
+   * Comunicação: Defina o endereço do broker MQTT (exemplo: broker.hivemq.com).
+4. Conecte o cabo Micro-USB ao ESP32, selecione a placa ESP32 Dev Module, escolha a porta COM correspondente e execute o procedimento de Upload.
+
+
+________________
+
+
+⚖️ PASSO 5: CALIBRAÇÃO INICIAL (TESTE DE TARA)
+1. Abra o Monitor Serial do seu ambiente de desenvolvimento e defina a velocidade para 115200 baud.
+2. Certifique-se de que o prato da balança esteja totalmente sem carga e aguarde a confirmação de tara zerada.
+3. Posicione um objeto de massa conhecida sobre o prato (exemplo: peso padrão de 500g ou smartphone de 200g).
+4. Ajuste o valor da constante FATOR_CALIBRACAO no código até que a leitura exibida no terminal coincida exatamente com a massa real do objeto.
+
+
+________________
+
+
+🌐 PASSO 6: INTEGRAÇÃO COM A NUVEM E APRESENTAÇÃO
+Objetivo: Estabelecer os fluxos de dados de telemetria, dashboards e comandos bidirecionais.
+
+
+1. Telemetria (Borda ➔ Nuvem): O ESP32 publicará dados periodicamente no tópico estoque/prateleira_01/telemetria, enviando a massa bruta lida e a contagem estimada de itens.
+2. Alertas Automáticos: Configure uma regra no broker ou webhook para que um bot do Telegram envie notificações caso a condição alerta_reposicao == true seja atingida.
+3. Comandos Remotos (Nuvem ➔ Borda): Envie mensagens JSON ao tópico estoque/prateleira_01/comando:
+   * Zerar balança: {"acao": "TARA"}
+   * Acionar localizador visual: {"ligar_led": true}
+
+
+________________
+
+
+🏁 TESTE FINAL (CHECKLIST DA BANCA)
+Marque os itens conforme validação em bancada:
+
+
+* A balança executa a tara automaticamente ao inicializar ou mediante comando remoto via MQTT.
+* A adição de 5 unidades do produto atualiza o painel da nuvem para exatamente 5 peças.
+* A remoção de itens para níveis abaixo do limite mínimo dispara a notificação no Telegram.
+* O acionamento remoto via dashboard acende o LED de Pick-to-Light no circuito físico.
